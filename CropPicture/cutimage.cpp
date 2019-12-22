@@ -26,8 +26,9 @@ CutImage::~CutImage()
 
 void CutImage::initView()
 {
-    this->setWindowTitle(tr("自定义游戏"));
+    this->setWindowTitle(tr("裁切图片"));
     this->setWindowFlags(Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint);
 
     ui->rb_square->setChecked(true);
+    ui->rb_nofix->setChecked(true);
 }

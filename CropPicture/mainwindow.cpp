@@ -68,7 +68,7 @@ QString MainWindow::getPathFromSettings(const QString &target)
     QVariant value = settings.value(target);
     QString path = value.toString();
     QDir dir(path);
-    if (!dir.exists())
+    if (!dir.exists() || path.isEmpty())
         path = QCoreApplication::applicationDirPath();
 
     return path;
