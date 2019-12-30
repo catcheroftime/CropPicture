@@ -170,6 +170,7 @@ void CropBox::setDirection(QPoint point)
 {
     if (m_bFixSized) {
         m_curDirec = NONE;
+        this->setCursor(QCursor(Qt::ArrowCursor));
         return;
     }
 
@@ -378,7 +379,7 @@ void CropBox::resizeSquare(QPoint global_point, QPoint local_point)
 
         case RIGHTBOTTOM: {
             if (parent_widget) {
-                if ( parent_point.x() > parent_widget->width() || parent_point.y() > parent_widget->height())
+                if ( parent_point.x() > parent_widget->width() || parent_point.y() > parent_widget->height() || parent_point.x()- rectMove.left() + rectMove.top()> parent_widget->height())
                     return;
             }
             if ( parent_point.x()  - rectMove.left() < MINSIZE || parent_point.y() - rectMove.top() < MINSIZE)

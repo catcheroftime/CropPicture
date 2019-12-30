@@ -8,6 +8,8 @@
 
 #define CONFIGFILE "config.ini"
 
+#include <QDebug>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -33,7 +35,17 @@ void MainWindow::on_ptn_openfile_clicked()
     setDefaultImportPath(fileinfo.path());
 
     CutImage dialog{file};
-    if ( dialog.exec() == QDialog::Accepted) {
+    if ( dialog.exec() == QDialog::Accepted ) {
+        QPixmap cropImage = dialog.getCropImage();
+
+        QString filename = fileinfo.baseName();
+        QString new_filename = filename + "_croped." + fileinfo.completeSuffix();
+
+        QString dir = getDefaultSavePath();
+
+        QFileInfo new_file {QDir{dir}, new_filename};
+
+        cropImage.save(new_file.absoluteFilePath());
 
     }
 }

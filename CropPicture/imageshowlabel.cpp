@@ -21,23 +21,38 @@ ImageShowLabel::ImageShowLabel(QWidget *parent) :
 
 void ImageShowLabel::setImage(const QPixmap &image)
 {
+    m_orginalImg = image;
     this->setPixmap(image);
 }
 
-//QPixmap ImageShowLabel::getCroppedImage()
-//{
-
-//}
+QPixmap ImageShowLabel::getCroppedImage()
+{
+    return m_orginalImg.copy(m_pCropBox->pos().x(), m_pCropBox->pos().y(), m_pCropBox->width(), m_pCropBox->height() );
+}
 
 void ImageShowLabel::setCropBoxLine(const int& widthcount, const int& heightcount)
 {
     m_pCropBox->setCropBoxLine(widthcount, heightcount );
-
+    update();
 }
 
 void ImageShowLabel::setCropBoxShape(CropBox::CropBoxShape shape)
 {
     m_pCropBox->setCropBoxShape(shape);
+    update();
+}
+
+void ImageShowLabel::setfixCropBox(const int &width, const int &height, bool fixed)
+{
+    if (fixed)
+        m_pCropBox->resize(width,height);
+    else
+        m_pCropBox->resize(100, 100);
+
+    if (m_pCropBox->width() + m_pCropBox->pos().x() > this->width() || m_pCropBox->height() + m_pCropBox->pos().y() > this->height())
+        m_pCropBox->move(0, 0);
+
+    m_pCropBox->fixCropBox(fixed);
 }
 
 void ImageShowLabel::paintEvent(QPaintEvent *event)

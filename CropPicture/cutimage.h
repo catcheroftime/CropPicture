@@ -16,6 +16,24 @@ public:
     explicit CutImage(const QString &filename, QWidget *parent = 0);
     ~CutImage();
 
+public:
+    QPixmap getCropImage();
+
+private slots:
+    void on_cb_difficulty_currentIndexChanged(int index);
+
+    void on_rb_square_clicked();
+    void on_rb_rectangle_clicked();
+
+    void on_rb_nofix_clicked();
+    void on_rb_fixszie_clicked();
+
+    void slotCropSizeChange();
+    void slotCropInternalLineChange();
+    void on_ptn_sure_clicked();
+
+    void on_ptn_cancel_clicked();
+
 private:
     void initView();
 
