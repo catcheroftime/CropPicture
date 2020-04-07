@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     initView();
+    initStyle();
 }
 
 MainWindow::~MainWindow()
@@ -64,6 +65,22 @@ void MainWindow::initView()
 {
     QString savepath = getDefaultSavePath();
     ui->le_savepath->setText(savepath);
+
+    this->setFixedSize(650,75);
+}
+
+void MainWindow::initStyle()
+{
+    this->setStyleSheet("QLineEdit{border:2px solid rgb(229,230,231); padding:5px; padding-left:10px; border-radius:3px; color:rgb(105,105,105);font:13px \"Microsoft YaHei\";}"
+                        "QLineEdit:focus{border:2px solid rgb(26,179,148);}");
+
+    ui->ptn_exportpath->setStyleSheet("QPushButton{background:rgb(26,179,148); color:rgb(255,255,255); border-radius:5px; min-height:30px; min-width:75px; font:12px \"Microsoft YaHei\";}"
+                                 "QPushButton:hover{background:rgb(24,166,137);}"
+                                 "QPushButton:pressed{background:rgb(32,75,148);}");
+
+    ui->ptn_openfile->setStyleSheet("QPushButton{background:rgb(237,85,101); color:rgb(255,255,255); border-radius:5px; min-height:30px; min-width:75px; font:12px \"Microsoft YaHei\";}"
+                                   "QPushButton:hover{background:rgb(236,71,88);}"
+                                   "QPushButton:pressed{background:rgb(171,71,37);}");
 }
 
 void MainWindow::setValueForSettings(const QString &target, const QVariant &value)

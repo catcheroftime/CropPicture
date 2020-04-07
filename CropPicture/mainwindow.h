@@ -22,6 +22,7 @@ private slots:
 
 private:
     void initView();
+    void initStyle();
     void setValueForSettings(const QString &target, const QVariant &value);
     QString getPathFromSettings(const QString &target);
 

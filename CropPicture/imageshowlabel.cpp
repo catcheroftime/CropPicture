@@ -4,7 +4,6 @@
 #include <QDebug>
 #include <QPainter>
 #include <QPainterPath>
-
 #include "cropbox.h"
 
 ImageShowLabel::ImageShowLabel(QWidget *parent) :
@@ -13,10 +12,7 @@ ImageShowLabel::ImageShowLabel(QWidget *parent) :
   , m_widthCount(3)
   , m_heightCount(3)
 {
-    m_pCropBox->setMouseTracking(true);
-    m_pCropBox->resize(100, 100);
-    m_pCropBox->move(0, 0);
-    m_pCropBox->show();
+    initView();
 }
 
 void ImageShowLabel::setImage(const QPixmap &image)
@@ -76,4 +72,12 @@ void ImageShowLabel::paintEvent(QPaintEvent *event)
 void ImageShowLabel::showEvent(QShowEvent *event)
 {
     Q_UNUSED(event);
+}
+
+void ImageShowLabel::initView()
+{
+    m_pCropBox->setMouseTracking(true);
+    m_pCropBox->resize(100, 100);
+    m_pCropBox->move(0, 0);
+    m_pCropBox->show();
 }

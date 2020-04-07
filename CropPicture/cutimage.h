@@ -36,6 +36,7 @@ private slots:
 
 private:
     void initView();
+    void initStyle();
 
 private:
     Ui::CutImage *ui;

@@ -15,7 +15,26 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QGridLayout" name="gridLayout_2">
+    <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,1,0,0,0,0,2">
+     <property name="bottomMargin">
+      <number>10</number>
+     </property>
+     <property name="horizontalSpacing">
+      <number>15</number>
+     </property>
+     <property name="verticalSpacing">
+      <number>10</number>
+     </property>
+     <item row="2" column="1" colspan="2">
+      <widget class="QRadioButton" name="rb_fixszie">
+       <property name="text">
+        <string>固定尺寸</string>
+       </property>
+       <attribute name="buttonGroup">
+        <string notr="true">bg_fixed</string>
+       </attribute>
+      </widget>
+     </item>
      <item row="2" column="3">
       <widget class="QLabel" name="label_5">
        <property name="text">
@@ -30,56 +49,6 @@
       <widget class="QLabel" name="label_6">
        <property name="text">
         <string>自定义：</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1" colspan="2">
-      <widget class="QRadioButton" name="rb_fixszie">
-       <property name="text">
-        <string>固定尺寸</string>
-       </property>
-       <attribute name="buttonGroup">
-        <string notr="true">bg_fixed</string>
-       </attribute>
-      </widget>
-     </item>
-     <item row="1" column="1" colspan="2">
-      <widget class="QRadioButton" name="rb_nofix">
-       <property name="text">
-        <string>不固定</string>
-       </property>
-       <attribute name="buttonGroup">
-        <string notr="true">bg_fixed</string>
-       </attribute>
-      </widget>
-     </item>
-     <item row="1" column="3">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>形状：</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="7">
-      <spacer name="horizontalSpacer_5">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_difficulty">
-       <property name="text">
-        <string>内部线条数：</string>
        </property>
       </widget>
      </item>
@@ -107,6 +76,46 @@
        </item>
       </widget>
      </item>
+     <item row="1" column="3">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>形状：</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_difficulty">
+       <property name="text">
+        <string>内部线条数：</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1" colspan="2">
+      <widget class="QRadioButton" name="rb_nofix">
+       <property name="text">
+        <string>不固定</string>
+       </property>
+       <attribute name="buttonGroup">
+        <string notr="true">bg_fixed</string>
+       </attribute>
+      </widget>
+     </item>
+     <item row="1" column="6">
+      <spacer name="horizontalSpacer_5">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
@@ -117,9 +126,6 @@
      <item row="2" column="5">
       <widget class="QSpinBox" name="sb_height"/>
      </item>
-     <item row="0" column="5">
-      <widget class="QSpinBox" name="sb_lineheight"/>
-     </item>
      <item row="1" column="5">
       <widget class="QRadioButton" name="rb_rectangle">
        <property name="text">
@@ -129,6 +135,12 @@
         <string notr="true">bg_shape</string>
        </attribute>
       </widget>
+     </item>
+     <item row="0" column="5">
+      <widget class="QSpinBox" name="sb_lineheight"/>
+     </item>
+     <item row="0" column="4">
+      <widget class="QSpinBox" name="sb_linewidth"/>
      </item>
      <item row="1" column="4">
       <widget class="QRadioButton" name="rb_square">
@@ -143,9 +155,6 @@
      <item row="2" column="4">
       <widget class="QSpinBox" name="sb_width"/>
      </item>
-     <item row="0" column="4">
-      <widget class="QSpinBox" name="sb_linewidth"/>
-     </item>
     </layout>
    </item>
    <item>
@@ -159,7 +168,7 @@
         <x>0</x>
         <y>0</y>
         <width>723</width>
-        <height>433</height>
+        <height>416</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout" rowstretch="1,0,1" columnstretch="1,0,1" rowminimumheight="0,0,0">
@@ -284,7 +293,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="bg_shape"/>
   <buttongroup name="bg_fixed"/>
+  <buttongroup name="bg_shape"/>
  </buttongroups>
 </ui>

@@ -2,6 +2,7 @@
 #include "ui_cutimage.h"
 
 #include <QPixmap>
+#include <QStyledItemDelegate>
 
 CutImage::CutImage(const QString &filename, QWidget *parent) :
     QDialog(parent),
@@ -11,19 +12,7 @@ CutImage::CutImage(const QString &filename, QWidget *parent) :
     ui->setupUi(this);
 
     initView();
-
-    int height = m_orignalImage.height();
-    int width = m_orignalImage.width();
-    this->resize(width + 100, height +150);
-
-
-    ui->sb_height->setRange(80, height);
-    ui->sb_width->setRange(80, width);
-
-    ui->sb_linewidth->setRange(0, 10);
-    ui->sb_lineheight->setRange(0, 10);
-
-    ui->lb_showimage->setImage(m_orignalImage);
+    initStyle();
 }
 
 CutImage::~CutImage()
@@ -43,6 +32,39 @@ void CutImage::initView()
 
     ui->rb_square->setChecked(true);
     ui->rb_nofix->setChecked(true);
+
+    int height = m_orignalImage.height();
+    int width = m_orignalImage.width();
+    this->resize(width+100, height+200);
+
+    ui->sb_height->setRange(80, height);
+    ui->sb_width->setRange(80, width);
+
+    ui->sb_linewidth->setRange(0, 10);
+    ui->sb_lineheight->setRange(0, 10);
+
+    ui->lb_showimage->setImage(m_orignalImage);
+}
+
+void CutImage::initStyle()
+{
+    QStyledItemDelegate * itemDelegate = new QStyledItemDelegate(this);
+    ui->cb_difficulty->setItemDelegate(itemDelegate);
+
+    this->setStyleSheet("QLabel{color:rgb(0,0,0); font:14px \"Microsoft YaHei\";}"
+                        "QComboBox{height:22px; border:2px solid rgb(229,230,231); padding: 2px; padding-left:5px; border-radius:3px; font:13px \"Microsoft YaHei\";}"
+                        "QComboBox:focus,QComboBox:checked{ border:2px solid rgb(26,179,148);}"
+                        "QComboBox::drop-down{subcontrol-origin: padding; subcontrol-position: top right; width: 22px; "
+                        "border-left-width: 1px;  border-left-color: darkgray;border-left-style: solid;border-top-right-radius: 3px;border-bottom-right-radius: 3px;}"
+                        "QComboBox::down-arrow {image: url(:/Images/Resource/down_arrow.png); }"
+                        "QComboBox QAbstractItemView::item{height: 22px; }"
+                        "QComboBox QAbstractItemView::item:selected{background-color:rgb(30,144,255); }"
+                        "QRadioButton{font:13px \"Microsoft YaHei\"; spacing:10px;}"
+                        "QSpinBox{width:60;height:20px;border:2px solid rgb(229,230,231);padding: 2px;padding-left:5px;border-radius:3px;font:13px \"Microsoft YaHei\";}"
+                        "QSpinBox:focus{border:2px solid rgb(26,179,148);}"
+                        "QSpinBox::down-button{ subcontrol-origin: padding; subcontrol-position:left;   width: 22px; image: url(:/Images/Resource/left_arrow.png); }"
+                        "QSpinBox::up-button{ subcontrol-origin: padding; subcontrol-position:right; width: 22px;image: url(:/Images/Resource/right_arrow.png); }" );
+
 }
 
 void CutImage::on_cb_difficulty_currentIndexChanged(int index)

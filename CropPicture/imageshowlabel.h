@@ -24,6 +24,9 @@ protected:
     void showEvent(QShowEvent *event);
 
 private:
+    void initView();
+
+private:
     CropBox * m_pCropBox;
     QPixmap m_orginalImg;
     int m_widthCount;

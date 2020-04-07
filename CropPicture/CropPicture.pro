@@ -16,7 +16,7 @@ TEMPLATE = app
 # depend on your compiler). Please consult the documentation of the
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
-
+RC_FILE = icon.rc
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
@@ -25,7 +25,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 Debug:DESTDIR = $$PWD/bin/debug
 Release:DESTDIR = $$PWD/bin/release
-
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -40,3 +39,10 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui \
             cutimage.ui
+
+DISTFILES += \
+    $$PWD/logo.ico \
+    $$PWD/icon.rc
+
+RESOURCES += \
+    resource.qrc
