@@ -2,6 +2,7 @@
 #define CROPBOX_H
 
 #include <QWidget>
+#include <QPainterPath>
 
 class CropBox : public QWidget
 {
@@ -15,16 +16,21 @@ public:
     ~CropBox();
 
     enum CropBoxShape {
-        Square = 0,
-        Rectangle,
+        Rect,
         Round
+    };
+
+    enum ZoomMode {
+        Free,
+        Ratio,
     };
 
     void fixCropBox(bool fixsized);
     void drawCropBoxInternalLines(bool drawable);
     void setCropBoxLine(const int & widthcount,const int& heightcount);
 
-    void setCropBoxShape(CropBoxShape shape = CropBoxShape::Rectangle);
+    void setCropBoxShape(CropBoxShape shape = CropBoxShape::Rect);
+    void setZoomMode(ZoomMode mode = ZoomMode::Free);
 
 protected:
     void showEvent(QShowEvent *event);
@@ -39,6 +45,7 @@ private:
     void drawInternalLines(QPainter &painter);
     void drawBorder(QPainter &painter);
     void drawPoints(QPainter &painter);
+    void drawRound(QPainter &painter);
     void drawSizeText(QPainter &painter);
 
     void setDirection(QPoint point);
@@ -47,6 +54,7 @@ private:
 
 private:
     CropBoxShape m_shape;
+    ZoomMode m_mode;
     bool m_bFixSized;
     bool m_bDrawInternalLines;
     int m_widthCount;

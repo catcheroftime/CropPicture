@@ -9,8 +9,6 @@
 ImageShowLabel::ImageShowLabel(QWidget *parent) :
     QLabel(parent)
   , m_pCropBox(new CropBox(this))
-  , m_widthCount(3)
-  , m_heightCount(3)
 {
     initView();
 }
@@ -67,11 +65,6 @@ void ImageShowLabel::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
     painter.fillPath(end_path, QColor(0, 0, 0, 100));
-}
-
-void ImageShowLabel::showEvent(QShowEvent *event)
-{
-    Q_UNUSED(event);
 }
 
 void ImageShowLabel::initView()
