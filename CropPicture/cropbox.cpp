@@ -11,7 +11,8 @@
 
 CropBox::CropBox(QWidget *parent)
     : QWidget(parent)
-    , m_shape(CropBoxShape::Square)
+    , m_shape(CropBoxShape::Rect)
+    , m_mode(ZoomMode::Free)
     , m_bFixSized(false)
     , m_bDrawInternalLines(true)
     , m_widthCount(4)
@@ -49,6 +50,11 @@ void CropBox::setCropBoxShape(CropBox::CropBoxShape shape)
     m_shape = shape;
 }
 
+void CropBox::setZoomMode(CropBox::ZoomMode mode)
+{
+    m_mode = mode;
+}
+
 void CropBox::showEvent(QShowEvent *event)
 {
     Q_UNUSED(event);
@@ -61,12 +67,17 @@ void CropBox::paintEvent(QPaintEvent *event)
     QPainter painter(this);
 
     drawBackground(painter);
-
     if (m_bDrawInternalLines)
         drawInternalLines(painter);
 
+    if (m_shape == Round) {
+        drawRound(painter);
+    }
+
+
     drawBorder(painter);
     drawPoints(painter);
+
     drawSizeText(painter);
 }
 
@@ -89,9 +100,9 @@ void CropBox::mouseMoveEvent(QMouseEvent *event)
     if (!m_bMovingFlag)
         setDirection(point);
     else {
-        if (m_shape == Rectangle)
+        if (m_mode == Ratio)
             resizeRectangle(global_point, point);
-        else if (m_shape == Square)
+        else
             resizeSquare(global_point, point);
     }
 
@@ -116,12 +127,21 @@ void CropBox::drawBackground(QPainter &painter)
     path.addRect(2, 2, this->width()-2, this->height()-2);
 
     painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.fillPath(path, QColor(50, 50, 50, 0));
+    painter.fillPath(path, QColor(0, 0, 0, 0));
 }
 
 void CropBox::drawInternalLines(QPainter &painter)
 {
-    painter.setPen( QPen{QColor{255,255,255},LINEWIDTH,Qt::DashLine});
+    QPainterPath cropbox_path;
+    if (m_shape == Round)
+        cropbox_path.addEllipse(SPACING, SPACING, this->width()-SPACING*2,  this->height()-SPACING*2);
+    else
+        cropbox_path.addRect(SPACING, SPACING, this->width()-SPACING*2,  this->height()-SPACING*2);
+
+    painter.setClipPath(cropbox_path);
+    painter.setClipping(true);
+
+    painter.setPen( QPen{QColor{230,230,230},LINEWIDTH,Qt::DashLine});
     for (int i=1; i<m_widthCount; i++) {
         int width = this->width() / m_widthCount;
         painter.drawLine( i*width,  SPACING , i*width , this->height()-SPACING);
@@ -131,15 +151,14 @@ void CropBox::drawInternalLines(QPainter &painter)
         int heigth = this->height()/ m_heightCount;
         painter.drawLine( SPACING ,i*heigth,   this->width()- SPACING, i*heigth);
     }
+
+    painter.setClipping(false);
 }
 
 void CropBox::drawBorder(QPainter &painter)
 {
     painter.setPen( QPen{QColor{3,125,203},SPACING});
-    painter.drawLine( SPACING,  SPACING , this->width()-SPACING , SPACING);
-    painter.drawLine( SPACING,  SPACING, SPACING , this->height()-SPACING);
-    painter.drawLine( SPACING,  this->height()-SPACING ,this->width()-SPACING , this->height()-SPACING);
-    painter.drawLine( this->width()-SPACING,  SPACING , this->width()-SPACING , this->height()-SPACING);
+    painter.drawRect( SPACING, SPACING, this->width()-SPACING*2,  this->height()-SPACING*2 );
 }
 
 void CropBox::drawPoints(QPainter &painter)
@@ -153,6 +172,24 @@ void CropBox::drawPoints(QPainter &painter)
     painter.drawPoint(this->width()-SPACING, this->height()/2);
     painter.drawPoint(this->width()-SPACING, this->height()-SPACING);
     painter.drawPoint(this->width()/2, this->height()-SPACING);
+}
+
+void CropBox::drawRound(QPainter &painter)
+{
+    painter.setPen( QPen{QColor{255,255,255},LINEWIDTH,Qt::DashLine});
+    painter.drawEllipse(SPACING, SPACING, this->width()-SPACING*2,  this->height()-SPACING*2 );
+
+
+    QPainterPath border, round;
+    border.setFillRule(Qt::WindingFill);
+    border.addRect(0, 0, this->width(), this->height());
+
+    round.setFillRule(Qt::WindingFill);
+    round.addEllipse(SPACING, SPACING, this->width()-SPACING*2,  this->height()-SPACING*2);
+
+    QPainterPath end_path = border.subtracted(round);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.fillPath(end_path, QColor(0, 0, 0, 100));
 }
 
 void CropBox::drawSizeText(QPainter &painter)

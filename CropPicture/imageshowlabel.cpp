@@ -10,8 +10,6 @@
 ImageShowLabel::ImageShowLabel(QWidget *parent) :
     QLabel(parent)
   , m_pCropBox(new CropBox(this))
-  , m_widthCount(3)
-  , m_heightCount(3)
 {
     m_pCropBox->setMouseTracking(true);
     m_pCropBox->resize(100, 100);
@@ -73,7 +71,3 @@ void ImageShowLabel::paintEvent(QPaintEvent *event)
     painter.fillPath(end_path, QColor(0, 0, 0, 100));
 }
 
-void ImageShowLabel::showEvent(QShowEvent *event)
-{
-    Q_UNUSED(event);
-}

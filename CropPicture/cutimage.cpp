@@ -24,6 +24,8 @@ CutImage::CutImage(const QString &filename, QWidget *parent) :
     ui->sb_lineheight->setRange(0, 10);
 
     ui->lb_showimage->setImage(m_orignalImage);
+
+    on_rb_square_clicked();
 }
 
 CutImage::~CutImage()
@@ -72,12 +74,12 @@ void CutImage::on_cb_difficulty_currentIndexChanged(int index)
 
 void CutImage::on_rb_square_clicked()
 {
-    ui->lb_showimage->setCropBoxShape(CropBox::CropBoxShape::Square);
+    ui->lb_showimage->setCropBoxShape(CropBox::CropBoxShape::Round);
 }
 
 void CutImage::on_rb_rectangle_clicked()
 {
-    ui->lb_showimage->setCropBoxShape(CropBox::CropBoxShape::Rectangle);
+    ui->lb_showimage->setCropBoxShape(CropBox::CropBoxShape::Rect);
 }
 
 void CutImage::on_rb_nofix_clicked()

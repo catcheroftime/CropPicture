@@ -26,17 +26,5 @@ DEFINES += QT_DEPRECATED_WARNINGS
 Debug:DESTDIR = $$PWD/bin/debug
 Release:DESTDIR = $$PWD/bin/release
 
-
-SOURCES += main.cpp\
-        mainwindow.cpp \
-        cropbox.cpp \
-        imageshowlabel.cpp \
-        cutimage.cpp
-
-HEADERS  += mainwindow.h \
-            cropbox.h \
-            imageshowlabel.h \
-            cutimage.h
-
-FORMS    += mainwindow.ui \
-            cutimage.ui
+include(cropplugin.pri)
+include(mainwindow.pri)
