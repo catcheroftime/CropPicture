@@ -36,6 +36,11 @@ void ImageShowLabel::setCropBoxShape(CropBox::CropBoxShape shape)
     update();
 }
 
+void ImageShowLabel::setCropBoxZoomMode(CropBox::ZoomMode mode)
+{
+    m_pCropBox->setZoomMode(mode);
+}
+
 void ImageShowLabel::setfixCropBox(const int &width, const int &height, bool fixed)
 {
     if (fixed)

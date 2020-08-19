@@ -34,6 +34,10 @@ private slots:
 
     void on_ptn_cancel_clicked();
 
+    void on_rb_ratio_clicked();
+
+    void on_rb_free_clicked();
+
 private:
     void initView();
     void initStyle();

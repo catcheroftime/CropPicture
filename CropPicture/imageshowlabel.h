@@ -16,6 +16,7 @@ public:
 
     void setCropBoxLine(const int & widthcount,const int& heightcount);
     void setCropBoxShape(CropBox::CropBoxShape shape  = CropBox::Rect);
+    void setCropBoxZoomMode(CropBox::ZoomMode mode  = CropBox::Free);
 
     void setfixCropBox(const int & width, const int& height, bool fixed = true);
 

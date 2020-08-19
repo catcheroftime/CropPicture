@@ -52,6 +52,8 @@ private:
     void resizeRectangle(QPoint global_point, QPoint local_point);
     void resizeSquare(QPoint global_point, QPoint local_point);
 
+    int judgePosition(int origin, int min, int max);
+
 private:
     CropBoxShape m_shape;
     ZoomMode m_mode;

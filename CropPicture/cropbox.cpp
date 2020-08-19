@@ -100,7 +100,7 @@ void CropBox::mouseMoveEvent(QMouseEvent *event)
     if (!m_bMovingFlag)
         setDirection(point);
     else {
-        if (m_mode == Ratio)
+        if (m_mode == Free)
             resizeRectangle(global_point, point);
         else
             resizeSquare(global_point, point);
@@ -276,11 +276,11 @@ void CropBox::resizeRectangle(QPoint global_point, QPoint local_point)
         case NONE: {
             QPoint end_point = global_point - m_dragPosition ;
             if (parent_widget) {
-                end_point.setX( end_point.x() <= 0 ? 0 : end_point.x() );
-                end_point.setX( end_point.x() >= parent_widget->width()-this->width() ? parent_widget->width()-this->width() : end_point.x() );
+                int new_x = judgePosition(end_point.x(), 0, parent_widget->width()-this->width());
+                end_point.setX(new_x);
 
-                end_point.setY( end_point.y() <= 0 ? 0: end_point.y());
-                end_point.setY( end_point.y() >= parent_widget->height()-this->height() ? parent_widget->height()-this->height(): end_point.y() );
+                int new_y = judgePosition(end_point.y(), 0, parent_widget->height()-this->height());
+                end_point.setY( new_y );
             }
             move( end_point );
             break;
@@ -396,11 +396,11 @@ void CropBox::resizeSquare(QPoint global_point, QPoint local_point)
         case NONE: {
             QPoint end_point = global_point - m_dragPosition ;
             if (parent_widget) {
-                end_point.setX(end_point.x() <= 0 ? 0 : end_point.x());
-                end_point.setX(end_point.x() >= parent_widget->width()-this->width() ? parent_widget->width()-this->width() : end_point.x());
+                int new_x = judgePosition(end_point.x(), 0, parent_widget->width()-this->width());
+                end_point.setX(new_x);
 
-                end_point.setY( end_point.y() <= 0 ? 0: end_point.y());
-                end_point.setY( end_point.y() >= parent_widget->height()-this->height() ? parent_widget->height()-this->height(): end_point.y());
+                int new_y = judgePosition(end_point.y(), 0, parent_widget->height()-this->height());
+                end_point.setY( new_y );
             }
             move( end_point );
             break;
@@ -506,4 +506,15 @@ void CropBox::resizeSquare(QPoint global_point, QPoint local_point)
     }
     if (m_curDirec != NONE)
         this->setGeometry(rectMove);
+}
+
+int CropBox::judgePosition(int origin, int min, int max)
+{
+    if (origin < min)
+        return min;
+
+    if (origin > max)
+        return max;
+
+    return origin;
 }
