@@ -1,5 +1,5 @@
 FORMS += \
-    $$PWD/mainwindow.ui
+    $$PWD/mainwindow.ui \
     $$PWD/cutimage.ui
 
 HEADERS += \

@@ -28,7 +28,9 @@ Release:DESTDIR = $$PWD/bin/release
 
 
 include(cropplugin.pri)
-include(mainwindow.pri)DISTFILES += \
+include(mainwindow.pri)
+
+DISTFILES += \
     $$PWD/logo.ico \
     $$PWD/icon.rc
 

@@ -276,9 +276,11 @@ void CropBox::resizeRectangle(QPoint global_point, QPoint local_point)
         case NONE: {
             QPoint end_point = global_point - m_dragPosition ;
             if (parent_widget) {
-                if (end_point.x() <= 0 || end_point.x() >= parent_widget->width()-this->width() ||
-                        end_point.y() <= 0 || end_point.y() >= parent_widget->height()-this->height() )
-                    return;
+                end_point.setX( end_point.x() <= 0 ? 0 : end_point.x() );
+                end_point.setX( end_point.x() >= parent_widget->width()-this->width() ? parent_widget->width()-this->width() : end_point.x() );
+
+                end_point.setY( end_point.y() <= 0 ? 0: end_point.y());
+                end_point.setY( end_point.y() >= parent_widget->height()-this->height() ? parent_widget->height()-this->height(): end_point.y() );
             }
             move( end_point );
             break;
@@ -394,9 +396,11 @@ void CropBox::resizeSquare(QPoint global_point, QPoint local_point)
         case NONE: {
             QPoint end_point = global_point - m_dragPosition ;
             if (parent_widget) {
-                if (end_point.x() <= 0 || end_point.x() >= parent_widget->width()-this->width() ||
-                        end_point.y() <= 0 || end_point.y() >= parent_widget->height()-this->height() )
-                    return;
+                end_point.setX(end_point.x() <= 0 ? 0 : end_point.x());
+                end_point.setX(end_point.x() >= parent_widget->width()-this->width() ? parent_widget->width()-this->width() : end_point.x());
+
+                end_point.setY( end_point.y() <= 0 ? 0: end_point.y());
+                end_point.setY( end_point.y() >= parent_widget->height()-this->height() ? parent_widget->height()-this->height(): end_point.y());
             }
             move( end_point );
             break;
