@@ -8,11 +8,14 @@
 #define LINEWIDTH 1
 #define SPACING   2
 #define POINTSIZE 5
+#define PADDING   4
 
 CropBox::CropBox(QWidget *parent)
     : QWidget(parent)
     , m_shape(CropBoxShape::Rect)
-    , m_mode(ZoomMode::Free)
+    , m_zoomMode(ZoomMode::Free)
+    , m_minWidth(80)
+    , m_minHeight(80)
     , m_bFixSized(false)
     , m_bDrawInternalLines(true)
     , m_widthCount(4)
@@ -27,6 +30,13 @@ CropBox::CropBox(QWidget *parent)
 CropBox::~CropBox()
 {
 
+}
+
+void CropBox::setMinSize(const int &width, const int &height)
+{
+    QWidget* parent_widget = (QWidget *)this->parent();
+    m_minWidth = judgePosition(width, 0, parent_widget->width());
+    m_minHeight =  judgePosition(height, 0, parent_widget->height());
 }
 
 void CropBox::fixCropBox(bool fixsized)
@@ -52,7 +62,7 @@ void CropBox::setCropBoxShape(CropBox::CropBoxShape shape)
 
 void CropBox::setZoomMode(CropBox::ZoomMode mode)
 {
-    m_mode = mode;
+    m_zoomMode = mode;
 }
 
 void CropBox::showEvent(QShowEvent *event)
@@ -74,7 +84,6 @@ void CropBox::paintEvent(QPaintEvent *event)
         drawRound(painter);
     }
 
-
     drawBorder(painter);
     drawPoints(painter);
 
@@ -83,8 +92,7 @@ void CropBox::paintEvent(QPaintEvent *event)
 
 void CropBox::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton)
-    {
+    if (event->button() == Qt::LeftButton) {
         m_bMovingFlag = true;
         m_dragPosition = event->globalPos() - this->pos();
     }
@@ -95,15 +103,16 @@ void CropBox::mousePressEvent(QMouseEvent *event)
 void CropBox::mouseMoveEvent(QMouseEvent *event)
 {
     QPoint point = event->pos();
+    QPoint parent_point = mapToParent(point);
     QPoint global_point = event->globalPos();
 
-    if (!m_bMovingFlag)
+    if (!m_bMovingFlag) {
         setDirection(point);
-    else {
-        if (m_mode == Free)
-            resizeRectangle(global_point, point);
+    } else {
+        if (m_curDirec == NONE)
+            handleMove(global_point);
         else
-            resizeSquare(global_point, point);
+            handleResize(parent_point);
     }
 
     event->accept();
@@ -113,9 +122,8 @@ void CropBox::mouseMoveEvent(QMouseEvent *event)
 void CropBox::mouseReleaseEvent(QMouseEvent *event)
 {
     this->setCursor(QCursor(Qt::ArrowCursor));
-    if(event->button()==Qt::LeftButton) {
+    if(event->button()==Qt::LeftButton)
         m_bMovingFlag = false;
-    }
 
     event->accept();
 }
@@ -179,7 +187,6 @@ void CropBox::drawRound(QPainter &painter)
     painter.setPen( QPen{QColor{255,255,255},LINEWIDTH,Qt::DashLine});
     painter.drawEllipse(SPACING, SPACING, this->width()-SPACING*2,  this->height()-SPACING*2 );
 
-
     QPainterPath border, round;
     border.setFillRule(Qt::WindingFill);
     border.addRect(0, 0, this->width(), this->height());
@@ -196,8 +203,8 @@ void CropBox::drawSizeText(QPainter &painter)
 {
     painter.setPen( QPen{QColor{255,0,0}});
     QString showText = QString("(") + QString::number(this->width()) + "," + QString::number(this->height()) + ")";
-    QPointF topleft{(qreal)this->width()-(qreal)MINSIZE, (qreal)this->height()-(qreal)20};
-    QSizeF size{MINSIZE,20};
+    QPointF topleft{(qreal)this->width()-(qreal)m_minWidth, (qreal)this->height()-(qreal)20};
+    QSizeF size{(qreal)m_minWidth,20};
     QRectF position {topleft, size};
     QTextOption option{Qt::AlignVCenter | Qt::AlignRight };
     painter.drawText(position, showText, option);
@@ -262,259 +269,206 @@ void CropBox::setDirection(QPoint point)
     }
 }
 
-void CropBox::resizeRectangle(QPoint global_point, QPoint local_point)
+void CropBox::handleMove(QPoint mouse_globalpos)
 {
-    QRect rectMove = this->geometry();
+    QWidget* parent_widget = (QWidget *)this->parent();
+    QPoint end_point = mouse_globalpos - m_dragPosition ;
+    if (parent_widget) {
+        int new_x = judgePosition(end_point.x(), 0, parent_widget->width()-this->width());
+        end_point.setX(new_x);
 
-    QPoint parent_point = mapToParent(local_point);
-
-    if (m_bMovingFlag)
-    {
-        QWidget* parent_widget = (QWidget *)this->parent();
-        switch(m_curDirec)
-        {
-        case NONE: {
-            QPoint end_point = global_point - m_dragPosition ;
-            if (parent_widget) {
-                int new_x = judgePosition(end_point.x(), 0, parent_widget->width()-this->width());
-                end_point.setX(new_x);
-
-                int new_y = judgePosition(end_point.y(), 0, parent_widget->height()-this->height());
-                end_point.setY( new_y );
-            }
-            move( end_point );
-            break;
-        }
-        case LEFTTOP:
-            if (parent_widget) {
-                if (parent_point.x() < 0 || parent_point.y() < 0)
-                    return;
-            }
-            if ( rectMove.right() - parent_point.x()  < MINSIZE || rectMove.bottom() - parent_point.y() < MINSIZE)
-                return;
-
-            rectMove.setLeft(parent_point.x() );
-            rectMove.setTop(parent_point.y());
-            break;
-        case RIGHTBOTTOM: {
-            if (parent_widget) {
-                if ( parent_point.x() > parent_widget->width() || parent_point.y() > parent_widget->height())
-                    return;
-            }
-            if ( parent_point.x()  - rectMove.left() < MINSIZE || parent_point.y() - rectMove.top() < MINSIZE)
-                return;
-
-            rectMove.setRight(parent_point.x() );
-            rectMove.setBottom(parent_point.y());
-            break;
-        }
-        case LEFTBOTTOM:
-            if (parent_widget) {
-                if (parent_point.x() < 0 || parent_point.y() > parent_widget->height())
-                    return;
-            }
-            if ( rectMove.right() - parent_point.x() < MINSIZE || parent_point.y() - rectMove.top() < MINSIZE)
-                return;
-
-            rectMove.setLeft(parent_point.x() );
-            rectMove.setBottom(parent_point.y());
-            break;
-        case RIGHTTOP:
-            if (parent_widget) {
-                if (parent_point.y() < 0 || parent_point.x() > parent_widget->width())
-                    return;
-            }
-            if ( parent_point.x()- rectMove.left() < MINSIZE || rectMove.bottom() - parent_point.y() < MINSIZE)
-                return;
-            rectMove.setRight(parent_point.x() );
-            rectMove.setTop(parent_point.y());
-            break;
-        case LEFT: {
-            if (parent_widget) {
-                if ( parent_point.x() < MINSIZE )
-                    return;
-            }
-
-            if ( rectMove.right() - parent_point.x() < MINSIZE )
-                return;
-
-            rectMove.setLeft(parent_point.x()  );
-            break;
-        }
-        case UP:
-            if (parent_widget) {
-                if (parent_point.y() < 0)
-                    return;
-            }
-            if ( rectMove.bottom() - parent_point.y() < MINSIZE)
-                return;
-
-            rectMove.setTop(parent_point.y());
-            break;
-        case RIGHT: {
-            if (parent_widget) {
-                if ( parent_point.x() > parent_widget->width())
-                    return;
-            }
-            if ( parent_point.x() - rectMove.left() < MINSIZE)
-                return;
-
-            rectMove.setRight(parent_point.x() );
-            break;
-        }
-        case DOWN: {
-            if (parent_widget) {
-                if ( parent_point.y() > parent_widget->height())
-                    return;
-            }
-            if ( parent_point.y() - rectMove.top() < MINSIZE)
-                return;
-
-            rectMove.setBottom(parent_point.y());
-            break;
-        }
-        default:
-            break;
-
-        }
+        int new_y = judgePosition(end_point.y(), 0, parent_widget->height()-this->height());
+        end_point.setY( new_y );
     }
-    if (m_curDirec != NONE)
-        this->setGeometry(rectMove);
+    move( end_point );
 }
 
-void CropBox::resizeSquare(QPoint global_point, QPoint local_point)
+void CropBox::handleResize(QPoint mouse_parentpos)
 {
+    if (!m_bMovingFlag)
+        return;
+
     QRect rectMove = this->geometry();
 
-    QPoint parent_point = mapToParent(local_point);
+    QPoint valid_point{mouse_parentpos} ;
 
-    if (m_bMovingFlag)
-    {
-        QWidget* parent_widget = (QWidget *)this->parent();
-        switch(m_curDirec)
-        {
-        case NONE: {
-            QPoint end_point = global_point - m_dragPosition ;
-            if (parent_widget) {
-                int new_x = judgePosition(end_point.x(), 0, parent_widget->width()-this->width());
-                end_point.setX(new_x);
+    QWidget* parent_widget = (QWidget *)this->parent();
+    valid_point.setX( judgePosition(valid_point.x(), 0, parent_widget->width()) );
+    valid_point.setY( judgePosition(valid_point.y(), 0, parent_widget->height()) );
 
-                int new_y = judgePosition(end_point.y(), 0, parent_widget->height()-this->height());
-                end_point.setY( new_y );
-            }
-            move( end_point );
-            break;
-        }
-        case LEFTTOP: {
-            if (parent_widget) {
-                if (parent_point.x() < 0 || parent_point.y() < 0 || parent_point.x()- rectMove.right() + rectMove.bottom() < 0)
-                    return;
-            }
-            if ( rectMove.right() - parent_point.x()  < MINSIZE || rectMove.bottom() - parent_point.y() < MINSIZE)
-                return;
-
-            rectMove.setLeft(parent_point.x() );
-            rectMove.setTop(parent_point.x()- rectMove.right() + rectMove.bottom());
-            break;
-        }
-
-        case RIGHTBOTTOM: {
-            if (parent_widget) {
-                if ( parent_point.x() > parent_widget->width() || parent_point.y() > parent_widget->height() || parent_point.x()- rectMove.left() + rectMove.top()> parent_widget->height())
-                    return;
-            }
-            if ( parent_point.x()  - rectMove.left() < MINSIZE || parent_point.y() - rectMove.top() < MINSIZE)
-                return;
-
-            rectMove.setRight( parent_point.x());
-            rectMove.setBottom(parent_point.x()- rectMove.left() + rectMove.top());
-            break;
-        }
-        case LEFTBOTTOM:
-            if (parent_widget) {
-                if (parent_point.x() < 0 || parent_point.y() > parent_widget->height() ||rectMove.top() - parent_point.x() + rectMove.right() > parent_widget->height() )
-                    return;
-            }
-            if ( rectMove.right() - parent_point.x() < MINSIZE || parent_point.y() - rectMove.top() < MINSIZE)
-                return;
-
-            rectMove.setLeft(parent_point.x() );
-            rectMove.setBottom(rectMove.top() - parent_point.x() + rectMove.right() );
-            break;
-        case RIGHTTOP:
-            if (parent_widget) {
-                if (parent_point.y() < 0 || parent_point.x() > parent_widget->width() || rectMove.bottom() - parent_point.x() + rectMove.left() < 0)
-                    return;
-            }
-            if ( parent_point.x()- rectMove.left() < MINSIZE || rectMove.bottom() - parent_point.y() < MINSIZE)
-                return;
-
-            rectMove.setRight(parent_point.x() );
-            rectMove.setTop(rectMove.bottom() - parent_point.x() + rectMove.left());
-            break;
-        case LEFT: {
-            if (parent_widget) {
-                if ( parent_point.x() < 0 || parent_point.x()- rectMove.right() + rectMove.bottom() < 0)
-                    return;
-            }
-
-            if ( rectMove.right() - parent_point.x() < MINSIZE )
-                return;
-
-            rectMove.setLeft(parent_point.x() );
-            rectMove.setTop(parent_point.x()- rectMove.right() + rectMove.bottom());
-            break;
-        }
-        case UP:
-            if (parent_widget) {
-                if (parent_point.y() < 0 || rectMove.left() - parent_point.y() + rectMove.bottom() > parent_widget->width() )
-                    return;
-            }
-            if ( rectMove.bottom() - parent_point.y() < MINSIZE)
-                return;
-
-            rectMove.setTop(parent_point.y() );
-            rectMove.setRight( rectMove.left() - parent_point.y() + rectMove.bottom());
-            break;
-        case RIGHT: {
-            if (parent_widget) {
-                if ( parent_point.x() > parent_widget->width() || parent_point.x()- rectMove.left() + rectMove.top() > parent_widget->height())
-                    return;
-            }
-            if ( parent_point.x() - rectMove.left() < MINSIZE)
-                return;
-
-            rectMove.setRight( parent_point.x());
-            rectMove.setBottom(parent_point.x()- rectMove.left() + rectMove.top());
-            break;
-        }
-        case DOWN: {
-            if (parent_widget) {
-                if ( parent_point.y() > parent_widget->height() || rectMove.top() - parent_point.y() + rectMove.right()< 0 )
-                    return;
-            }
-            if ( parent_point.y() - rectMove.top() < MINSIZE)
-                return;
-
-            rectMove.setBottom( parent_point.y());
-            rectMove.setLeft(rectMove.top() - parent_point.y() + rectMove.right() );
-            break;
-        }
-        default:
-            break;
-        }
+    switch(m_curDirec) {
+    case UP:
+        handleResizeUp(valid_point, rectMove, parent_widget);
+        break;
+    case DOWN:
+        handleResizeDown(valid_point, rectMove, parent_widget);
+        break;
+    case LEFT:
+        handleResizeLeft(valid_point, rectMove, parent_widget);
+        break;
+    case RIGHT:
+        handleResizeRight(valid_point, rectMove, parent_widget);
+        break;
+    case RIGHTTOP:
+        handleResizeRightTop(valid_point, rectMove, parent_widget);
+        break;
+    case RIGHTBOTTOM:
+        handleResizeRightBottom(valid_point, rectMove, parent_widget);
+        break;
+    case LEFTTOP:
+        handleResizeLeftTop(valid_point, rectMove, parent_widget);
+        break;
+    case LEFTBOTTOM:
+        handleResizeLeftBottom(valid_point, rectMove, parent_widget);
+        break;
+    default:
+        break;
     }
-    if (m_curDirec != NONE)
-        this->setGeometry(rectMove);
+
+    this->setGeometry(rectMove);
 }
 
-int CropBox::judgePosition(int origin, int min, int max)
+void CropBox::handleResizeUp(QPoint &valid_point, QRect &rectNew, const QWidget *parent_widget)
 {
-    if (origin < min)
-        return min;
+    if (rectNew.bottom() - valid_point.y() < m_minHeight)
+        valid_point.setY( rectNew.bottom() - m_minHeight );
 
-    if (origin > max)
-        return max;
+    if (m_zoomMode ==  Ratio) {
+        handleResizeRightTop(valid_point, rectNew, parent_widget);
+        return;
+    }
 
+    rectNew.setTop( valid_point.y() );
+}
+
+void CropBox::handleResizeDown(QPoint &valid_point, QRect &rectNew, const QWidget *parent_widget)
+{
+    if ( valid_point.y() - rectNew.top() < m_minHeight)
+        valid_point.setY( rectNew.top() + m_minHeight);
+
+    if (m_zoomMode ==  Ratio) {
+        handleResizeLeftBottom(valid_point, rectNew, parent_widget);
+        return;
+    }
+
+    rectNew.setBottom( valid_point.y() );
+}
+
+void CropBox::handleResizeLeft(QPoint &valid_point, QRect &rectNew, const QWidget *parent_widget)
+{
+    if ( rectNew.right() - valid_point.x() < m_minWidth)
+        valid_point.setX( rectNew.right() - m_minWidth);
+
+    if (m_zoomMode ==  Ratio) {
+        handleResizeLeftTop(valid_point, rectNew, parent_widget);
+        return;
+    }
+
+    rectNew.setLeft( valid_point.x() );
+}
+
+void CropBox::handleResizeRight(QPoint &valid_point, QRect &rectNew, const QWidget *parent_widget)
+{
+    if ( valid_point.x() - rectNew.left() < m_minWidth)
+        valid_point.setX( rectNew.left() + m_minWidth);
+
+    if (m_zoomMode ==  Ratio) {
+        handleResizeRightBottom(valid_point, rectNew, parent_widget);
+        return;
+    }
+
+    rectNew.setRight( valid_point.x() );
+}
+
+void CropBox::handleResizeRightTop(QPoint &valid_point, QRect &rectNew, const QWidget *parent_widget)
+{
+    if (valid_point.x() - rectNew.left() < m_minWidth)
+        valid_point.setX( rectNew.left() + m_minWidth );
+
+    if (rectNew.bottom() - valid_point.y() < m_minHeight)
+        valid_point.setY( rectNew.bottom() - m_minHeight);
+
+    if (m_zoomMode ==  Ratio) {
+        int right = rectNew.bottom()- valid_point.y() + rectNew.left() ;
+        if ( right > parent_widget->width() ) {
+            right = parent_widget->width();
+            valid_point.setY(  rectNew.bottom() - parent_widget->width() + rectNew.left() );
+        }
+        valid_point.setX( right );
+    }
+
+    rectNew.setRight(valid_point.x());
+    rectNew.setTop(valid_point.y());
+}
+
+void CropBox::handleResizeRightBottom(QPoint &valid_point, QRect &rectNew, const QWidget *parent_widget)
+{
+    if (valid_point.x() - rectNew.left() < m_minWidth)
+        valid_point.setX( m_minWidth + rectNew.left() );
+
+    if (valid_point.y() - rectNew.top()  < m_minHeight)
+        valid_point.setY( rectNew.top() + m_minHeight);
+
+    if (m_zoomMode ==  Ratio) {
+        int bottom =  valid_point.x() - rectNew.left() + rectNew.top() ;
+        if ( bottom >  parent_widget->height()) {
+            bottom = parent_widget->height();
+            valid_point.setX( parent_widget->height() - rectNew.top() + rectNew.left());
+        }
+        valid_point.setY( bottom );
+    }
+
+    rectNew.setRight(valid_point.x());
+    rectNew.setBottom(valid_point.y());
+}
+
+void CropBox::handleResizeLeftTop(QPoint &valid_point, QRect &rectNew, const QWidget *parent_widget)
+{
+    Q_UNUSED(parent_widget);
+    if (rectNew.right() - valid_point.x() < m_minWidth)
+        valid_point.setX( rectNew.right() - m_minWidth );
+
+    if (rectNew.bottom() - valid_point.y()   < m_minHeight)
+        valid_point.setY( rectNew.top() - m_minHeight);
+
+    if (m_zoomMode ==  Ratio) {
+        int top = rectNew.bottom()  - rectNew.right() +  valid_point.x() ;
+        if ( top < 0 ) {
+            top = 0;
+            valid_point.setX( rectNew.right() - rectNew.bottom() );
+        }
+        valid_point.setY( top );
+    }
+
+    rectNew.setLeft(valid_point.x());
+    rectNew.setTop(valid_point.y());
+}
+
+void CropBox::handleResizeLeftBottom(QPoint &valid_point, QRect &rectNew, const QWidget *parent_widget)
+{
+    Q_UNUSED(parent_widget);
+    if (rectNew.right() - valid_point.x() < m_minWidth)
+        valid_point.setX( rectNew.right() - m_minWidth );
+
+    if (valid_point.y() - rectNew.top()  < m_minHeight)
+        valid_point.setY( rectNew.top() + m_minHeight);
+
+    if (m_zoomMode ==  Ratio) {
+        int left = rectNew.right() -  valid_point.y() + rectNew.top()   ;
+        if ( left < 0 ) {
+            left = 0;
+            valid_point.setY( rectNew.right() + rectNew.top() );
+        }
+        valid_point.setX( left ) ;
+    }
+
+    rectNew.setLeft(valid_point.x());
+    rectNew.setBottom(valid_point.y());
+}
+
+inline int CropBox::judgePosition(int origin, int min, int max)
+{
+    if (origin < min)  return min;
+    if (origin > max)  return max;
     return origin;
 }

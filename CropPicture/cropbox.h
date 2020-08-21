@@ -9,10 +9,9 @@ class CropBox : public QWidget
     Q_OBJECT
 
     enum Direction { UP=0, DOWN, LEFT, RIGHT, LEFTTOP, LEFTBOTTOM, RIGHTBOTTOM, RIGHTTOP, NONE };
-    enum {PADDING = 5, MINSIZE = 80};
 
 public:
-    CropBox(QWidget *parent = 0);
+    CropBox(QWidget *parent);
     ~CropBox();
 
     enum CropBoxShape {
@@ -25,6 +24,7 @@ public:
         Ratio,
     };
 
+    void setMinSize(const int &width, const int &height);
     void fixCropBox(bool fixsized);
     void drawCropBoxInternalLines(bool drawable);
     void setCropBoxLine(const int & widthcount,const int& heightcount);
@@ -49,14 +49,28 @@ private:
     void drawSizeText(QPainter &painter);
 
     void setDirection(QPoint point);
-    void resizeRectangle(QPoint global_point, QPoint local_point);
-    void resizeSquare(QPoint global_point, QPoint local_point);
 
-    int judgePosition(int origin, int min, int max);
+    void handleMove(QPoint mouse_globalpos);
+    void handleResize(QPoint mouse_parentpos);
+
+    void handleResizeUp(QPoint &valid_point, QRect &rectNew, const QWidget *parent_widget);
+    void handleResizeDown(QPoint &valid_point, QRect &rectNew, const QWidget *parent_widget);
+    void handleResizeLeft(QPoint &valid_point, QRect &rectNew, const QWidget *parent_widget);
+    void handleResizeRight(QPoint &valid_point, QRect &rectNew, const QWidget *parent_widget);
+    void handleResizeRightTop(QPoint &valid_point, QRect &rectNew, const QWidget *parent_widget);
+    void handleResizeRightBottom(QPoint &valid_point, QRect &rectNew, const QWidget *parent_widget);
+    void handleResizeLeftTop(QPoint &valid_point, QRect &rectNew, const QWidget *parent_widget);
+    void handleResizeLeftBottom(QPoint &valid_point, QRect &rectNew, const QWidget *parent_widget);
+
+    inline int judgePosition(int origin, int min, int max);
 
 private:
     CropBoxShape m_shape;
-    ZoomMode m_mode;
+    ZoomMode m_zoomMode;
+
+    int m_minWidth;
+    int m_minHeight;
+
     bool m_bFixSized;
     bool m_bDrawInternalLines;
     int m_widthCount;

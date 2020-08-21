@@ -10,6 +10,7 @@ ImageShowLabel::ImageShowLabel(QWidget *parent) :
     QLabel(parent)
   , m_pCropBox(new CropBox(this))
 {
+    m_pCropBox->setMinSize(100,30);
     initView();
 }
 
