@@ -135,30 +135,6 @@
      <item row="2" column="3">
       <widget class="QSpinBox" name="sb_width"/>
      </item>
-     <item row="3" column="3" colspan="2">
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <item>
-        <widget class="QRadioButton" name="rb_ratio">
-         <property name="text">
-          <string>1:1放缩</string>
-         </property>
-         <attribute name="buttonGroup">
-          <string notr="true">bg_mode</string>
-         </attribute>
-        </widget>
-       </item>
-       <item>
-        <widget class="QRadioButton" name="rb_free">
-         <property name="text">
-          <string>自由</string>
-         </property>
-         <attribute name="buttonGroup">
-          <string notr="true">bg_mode</string>
-         </attribute>
-        </widget>
-       </item>
-      </layout>
-     </item>
      <item row="1" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
@@ -178,6 +154,40 @@
          </property>
          <attribute name="buttonGroup">
           <string notr="true">bg_shape</string>
+         </attribute>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="3" column="2" colspan="3">
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QRadioButton" name="rb_free">
+         <property name="text">
+          <string>自由</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">bg_mode</string>
+         </attribute>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="rb_fixed">
+         <property name="text">
+          <string>固定比例</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">bg_mode</string>
+         </attribute>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="rb_ratio">
+         <property name="text">
+          <string>1:1放缩</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">bg_mode</string>
          </attribute>
         </widget>
        </item>
@@ -321,8 +331,8 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="bg_shape"/>
   <buttongroup name="bg_fixed"/>
+  <buttongroup name="bg_shape"/>
   <buttongroup name="bg_mode"/>
  </buttongroups>
 </ui>

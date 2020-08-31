@@ -38,6 +38,8 @@ private slots:
 
     void on_rb_free_clicked();
 
+    void on_rb_fixed_clicked();
+
 private:
     void initView();
     void initStyle();

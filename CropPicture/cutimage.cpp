@@ -13,8 +13,6 @@ CutImage::CutImage(const QString &filename, QWidget *parent) :
 
     initView();
     initStyle();
-
-
 }
 
 CutImage::~CutImage()
@@ -36,8 +34,8 @@ void CutImage::initView()
     on_rb_square_clicked();
 
     ui->rb_nofix->setChecked(true);
-    ui->rb_ratio->setChecked(true);
-    on_rb_ratio_clicked();
+    ui->rb_free->setChecked(true);
+    on_rb_free_clicked();
 
     int height = m_orignalImage.height();
     int width = m_orignalImage.width();
@@ -146,10 +144,15 @@ void CutImage::on_ptn_cancel_clicked()
 
 void CutImage::on_rb_ratio_clicked()
 {
-    ui->lb_showimage->setCropBoxZoomMode(CropBox::ZoomMode::Ratio);
+    ui->lb_showimage->setCropBoxZoomMode(CropBox::ZoomMode::Square);
 }
 
 void CutImage::on_rb_free_clicked()
 {
     ui->lb_showimage->setCropBoxZoomMode(CropBox::ZoomMode::Free);
+}
+
+void CutImage::on_rb_fixed_clicked()
+{
+      ui->lb_showimage->setCropBoxZoomMode(CropBox::ZoomMode::FixedRatio);
 }

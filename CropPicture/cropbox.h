@@ -21,7 +21,8 @@ public:
 
     enum ZoomMode {
         Free,
-        Ratio,
+        FixedRatio,
+        Square,
     };
 
     void setMinSize(const int &width, const int &height);
@@ -33,12 +34,14 @@ public:
     void setZoomMode(ZoomMode mode = ZoomMode::Free);
 
 protected:
-    void showEvent(QShowEvent *event);
     void paintEvent(QPaintEvent *event);
 
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
+
+    void keyPressEvent(QKeyEvent *event);
+    void keyReleaseEvent(QKeyEvent *event);
 
 private:
     void drawBackground(QPainter &painter);
@@ -67,9 +70,14 @@ private:
 private:
     CropBoxShape m_shape;
     ZoomMode m_zoomMode;
+    ZoomMode m_keyPressZoomMode;
 
     int m_minWidth;
     int m_minHeight;
+
+    double m_heightwidthRatio;
+    double m_ratioMinWidth;
+    double m_ratioMinHeight;
 
     bool m_bFixSized;
     bool m_bDrawInternalLines;
