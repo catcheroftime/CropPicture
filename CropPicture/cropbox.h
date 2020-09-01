@@ -31,7 +31,10 @@ public:
     void setCropBoxLine(const int & widthcount,const int& heightcount);
 
     void setCropBoxShape(CropBoxShape shape = CropBoxShape::Rect);
+    CropBoxShape getCropBoxShape();
+
     void setZoomMode(ZoomMode mode = ZoomMode::Free);
+    void setEnableKeyPressEvent(bool enabled);
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -44,11 +47,9 @@ protected:
     void keyReleaseEvent(QKeyEvent *event);
 
 private:
-    void drawBackground(QPainter &painter);
-    void drawInternalLines(QPainter &painter);
     void drawBorder(QPainter &painter);
     void drawPoints(QPainter &painter);
-    void drawRound(QPainter &painter);
+    void drawInternalLines(QPainter &painter);
     void drawSizeText(QPainter &painter);
 
     void setDirection(QPoint point);

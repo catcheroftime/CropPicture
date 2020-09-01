@@ -39,7 +39,7 @@ void CutImage::initView()
 
     int height = m_orignalImage.height();
     int width = m_orignalImage.width();
-    this->resize(width+100, height+200);
+    this->resize(width+100, height+220);
 
     ui->sb_height->setRange(80, height);
     ui->sb_width->setRange(80, width);
@@ -68,6 +68,14 @@ void CutImage::initStyle()
                         "QSpinBox:focus{border:2px solid rgb(26,179,148);}"
                         "QSpinBox::down-button{ subcontrol-origin: padding; subcontrol-position:left;   width: 22px; image: url(:/Images/Resource/left_arrow.png); }"
                         "QSpinBox::up-button{ subcontrol-origin: padding; subcontrol-position:right; width: 22px;image: url(:/Images/Resource/right_arrow.png); }" );
+
+    ui->ptn_cancel->setStyleSheet("QPushButton{background:rgb(26,179,148); color:rgb(255,255,255); border-radius:5px; min-height:30px; min-width:75px; font:12px \"Microsoft YaHei\";}"
+                                 "QPushButton:hover{background:rgb(24,166,137);}"
+                                 "QPushButton:pressed{background:rgb(32,75,148);}");
+
+    ui->ptn_sure->setStyleSheet("QPushButton{background:rgb(237,85,101); color:rgb(255,255,255); border-radius:5px; min-height:30px; min-width:75px; font:12px \"Microsoft YaHei\";}"
+                                   "QPushButton:hover{background:rgb(236,71,88);}"
+                                   "QPushButton:pressed{background:rgb(171,71,37);}");
 
 }
 

@@ -16,7 +16,8 @@ public:
 
     void setCropBoxLine(const int & widthcount,const int& heightcount);
     void setCropBoxShape(CropBox::CropBoxShape shape  = CropBox::Rect);
-    void setCropBoxZoomMode(CropBox::ZoomMode mode  = CropBox::Free);
+    void setCropBoxZoomMode(CropBox::ZoomMode mode  = CropBox::Free);  
+    void setEnableKeyPressEvent(bool enabled);
 
     void setfixCropBox(const int & width, const int& height, bool fixed = true);
 

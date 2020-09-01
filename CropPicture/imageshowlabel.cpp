@@ -10,7 +10,6 @@ ImageShowLabel::ImageShowLabel(QWidget *parent) :
     QLabel(parent)
   , m_pCropBox(new CropBox(this))
 {
-    m_pCropBox->setMinSize(100,30);
     initView();
 }
 
@@ -42,6 +41,11 @@ void ImageShowLabel::setCropBoxZoomMode(CropBox::ZoomMode mode)
     m_pCropBox->setZoomMode(mode);
 }
 
+void ImageShowLabel::setEnableKeyPressEvent(bool enabled)
+{
+    m_pCropBox->setEnableKeyPressEvent(enabled);
+}
+
 void ImageShowLabel::setfixCropBox(const int &width, const int &height, bool fixed)
 {
     if (fixed)
@@ -58,13 +62,15 @@ void ImageShowLabel::setfixCropBox(const int &width, const int &height, bool fix
 void ImageShowLabel::paintEvent(QPaintEvent *event)
 {
     QLabel::paintEvent(event);
-
     QPainterPath border, cropbox;
     border.setFillRule(Qt::WindingFill);
     border.addRect(0, 0, this->width(), this->height());
 
     cropbox.setFillRule(Qt::WindingFill);
-    cropbox.addRect(m_pCropBox->pos().x()+1,m_pCropBox->pos().y()+1, m_pCropBox->width()-2, m_pCropBox->height()-2);
+    if (m_pCropBox->getCropBoxShape() == CropBox::Rect)
+        cropbox.addRect(m_pCropBox->pos().x()+2,m_pCropBox->pos().y()+2, m_pCropBox->width()-4, m_pCropBox->height()-4);
+    else
+        cropbox.addEllipse(m_pCropBox->pos().x()+2,m_pCropBox->pos().y()+2, m_pCropBox->width()-4, m_pCropBox->height()-4);
 
     QPainterPath end_path = border.subtracted(cropbox);
 
@@ -75,7 +81,6 @@ void ImageShowLabel::paintEvent(QPaintEvent *event)
 
 void ImageShowLabel::initView()
 {
-    m_pCropBox->setMouseTracking(true);
     m_pCropBox->resize(100, 100);
     m_pCropBox->move(0, 0);
     m_pCropBox->show();

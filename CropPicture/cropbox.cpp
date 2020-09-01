@@ -4,6 +4,7 @@
 #include <QPainterPath>
 #include <QPainter>
 #include <QMouseEvent>
+#include <QStyleOption>
 
 #define LINEWIDTH 1
 #define SPACING   2
@@ -27,9 +28,8 @@ CropBox::CropBox(QWidget *parent)
     , m_bMovingFlag(false)
     , m_curDirec(NONE)
 {
-    this->installEventFilter(this);
     this->setMouseTracking(true);
-    this->grabKeyboard();
+    this->setEnableKeyPressEvent(true);
 }
 
 CropBox::~CropBox()
@@ -40,8 +40,11 @@ CropBox::~CropBox()
 void CropBox::setMinSize(const int &width, const int &height)
 {
     QWidget* parent_widget = (QWidget *)this->parent();
-    m_minWidth = judgePosition(width, parent_widget->width()<10?parent_widget->width()/2:10, parent_widget->width());
-    m_minHeight =  judgePosition(height, parent_widget->height()<10?parent_widget->height()/2:10, parent_widget->height());
+    if (parent_widget) {
+        m_minWidth = judgePosition(width, parent_widget->width()<10?parent_widget->width()/2:10, parent_widget->width());
+        m_minHeight =  judgePosition(height, parent_widget->height()<10?parent_widget->height()/2:10, parent_widget->height());
+    }
+
 }
 
 void CropBox::fixCropBox(bool fixsized)
@@ -65,6 +68,11 @@ void CropBox::setCropBoxShape(CropBox::CropBoxShape shape)
     m_shape = shape;
 }
 
+CropBox::CropBoxShape CropBox::getCropBoxShape()
+{
+    return m_shape;
+}
+
 void CropBox::setZoomMode(CropBox::ZoomMode mode)
 {
     m_zoomMode = mode;
@@ -78,24 +86,25 @@ void CropBox::setZoomMode(CropBox::ZoomMode mode)
     m_ratioMinHeight = m_minWidth * m_heightwidthRatio > m_minHeight? m_minWidth * m_heightwidthRatio : m_minHeight;
 }
 
+void CropBox::setEnableKeyPressEvent(bool enabled)
+{
+    if (enabled)
+        this->grabKeyboard();
+    else
+        this->releaseKeyboard();
+}
+
 
 void CropBox::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
-
     QPainter painter(this);
 
-    drawBackground(painter);
     if (m_bDrawInternalLines)
         drawInternalLines(painter);
 
-    if (m_shape == Round) {
-        drawRound(painter);
-    }
-
     drawBorder(painter);
     drawPoints(painter);
-
     drawSizeText(painter);
 }
 
@@ -162,14 +171,28 @@ void CropBox::keyReleaseEvent(QKeyEvent *event)
     QWidget::keyPressEvent(event);
 }
 
-void CropBox::drawBackground(QPainter &painter)
+void CropBox::drawBorder(QPainter &painter)
 {
-    QPainterPath path;
-    path.setFillRule(Qt::WindingFill);
-    path.addRect(2, 2, this->width()-2, this->height()-2);
+    painter.setPen( QPen{QColor{3,125,203},SPACING});
+    painter.drawRect( SPACING, SPACING, this->width()-SPACING*2,  this->height()-SPACING*2 );
 
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.fillPath(path, QColor(0, 0, 0, 0));
+    if (m_shape == Round) {
+        painter.setPen( QPen{QColor{255,255,255},LINEWIDTH,Qt::DashLine});
+        painter.drawEllipse(SPACING, SPACING, this->width()-SPACING*2,  this->height()-SPACING*2 );
+    }
+}
+
+void CropBox::drawPoints(QPainter &painter)
+{
+    painter.setPen( QPen{QColor{3,125,203},POINTSIZE});
+    painter.drawPoint(SPACING,SPACING);
+    painter.drawPoint(this->width()/2, SPACING);
+    painter.drawPoint(this->width()-SPACING, SPACING);
+    painter.drawPoint(SPACING, this->height()/2);
+    painter.drawPoint(SPACING, this->height()-SPACING);
+    painter.drawPoint(this->width()-SPACING, this->height()/2);
+    painter.drawPoint(this->width()-SPACING, this->height()-SPACING);
+    painter.drawPoint(this->width()/2, this->height()-SPACING);
 }
 
 void CropBox::drawInternalLines(QPainter &painter)
@@ -197,42 +220,6 @@ void CropBox::drawInternalLines(QPainter &painter)
     painter.setClipping(false);
 }
 
-void CropBox::drawBorder(QPainter &painter)
-{
-    painter.setPen( QPen{QColor{3,125,203},SPACING});
-    painter.drawRect( SPACING, SPACING, this->width()-SPACING*2,  this->height()-SPACING*2 );
-}
-
-void CropBox::drawPoints(QPainter &painter)
-{
-    painter.setPen( QPen{QColor{3,125,203},POINTSIZE});
-    painter.drawPoint(SPACING,SPACING);
-    painter.drawPoint(this->width()/2, SPACING);
-    painter.drawPoint(this->width()-SPACING, SPACING);
-    painter.drawPoint(SPACING, this->height()/2);
-    painter.drawPoint(SPACING, this->height()-SPACING);
-    painter.drawPoint(this->width()-SPACING, this->height()/2);
-    painter.drawPoint(this->width()-SPACING, this->height()-SPACING);
-    painter.drawPoint(this->width()/2, this->height()-SPACING);
-}
-
-void CropBox::drawRound(QPainter &painter)
-{
-    painter.setPen( QPen{QColor{255,255,255},LINEWIDTH,Qt::DashLine});
-    painter.drawEllipse(SPACING, SPACING, this->width()-SPACING*2,  this->height()-SPACING*2 );
-
-    QPainterPath border, round;
-    border.setFillRule(Qt::WindingFill);
-    border.addRect(0, 0, this->width(), this->height());
-
-    round.setFillRule(Qt::WindingFill);
-    round.addEllipse(SPACING, SPACING, this->width()-SPACING*2,  this->height()-SPACING*2);
-
-    QPainterPath end_path = border.subtracted(round);
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.fillPath(end_path, QColor(0, 0, 0, 100));
-}
-
 void CropBox::drawSizeText(QPainter &painter)
 {
     painter.setPen( QPen{QColor{255,0,0}});
@@ -258,12 +245,12 @@ void CropBox::setDirection(QPoint point)
     if ( PADDING >= point.x() && 0 <= point.x() &&  PADDING  >= point.y() && 0 <= point.y())
     {
         m_curDirec = LEFTTOP;
-        this->setCursor(QCursor(Qt::SizeFDiagCursor));  // 设置鼠标形状
+        this->setCursor(QCursor(Qt::SizeFDiagCursor));
     }
     else if(width - PADDING <= point.x() && width >= point.x() && heigth - PADDING <= point.y() && heigth >= point.y())
     {
         m_curDirec = RIGHTBOTTOM;
-        this->setCursor(QCursor(Qt::SizeFDiagCursor));  // 设置鼠标形状
+        this->setCursor(QCursor(Qt::SizeFDiagCursor));
     }
     else if(PADDING >= point.x() && 0 <= point.x() && heigth - PADDING <= point.y() && heigth >= point.y())
     {
@@ -284,7 +271,6 @@ void CropBox::setDirection(QPoint point)
     {
         m_curDirec = UP;
         this->setCursor(QCursor(Qt::SizeVerCursor));
-
     }
     else if(width - PADDING <= point.x() && width >= point.x())
     {
@@ -369,8 +355,8 @@ void CropBox::handleResizeUp(QPoint &valid_point, QRect &rectNew, const QWidget 
         return;
     }
 
-    if (rectNew.bottom() - valid_point.y() < m_minHeight)
-        valid_point.setY( rectNew.bottom() - m_minHeight );
+    if (rectNew.bottom() - valid_point.y() + 1  <= m_minHeight)
+        valid_point.setY( rectNew.bottom() - m_minHeight + 1);
 
     rectNew.setTop( valid_point.y() );
 }
@@ -382,8 +368,8 @@ void CropBox::handleResizeDown(QPoint &valid_point, QRect &rectNew, const QWidge
         return;
     }
 
-    if ( valid_point.y() - rectNew.top() < m_minHeight)
-        valid_point.setY( rectNew.top() + m_minHeight);
+    if ( valid_point.y() - rectNew.top() + 1 <= m_minHeight)
+        valid_point.setY( rectNew.top() + m_minHeight - 1);
 
     rectNew.setBottom( valid_point.y() );
 }
@@ -395,8 +381,8 @@ void CropBox::handleResizeLeft(QPoint &valid_point, QRect &rectNew, const QWidge
         return;
     }
 
-    if ( rectNew.right() - valid_point.x() < m_minWidth)
-        valid_point.setX( rectNew.right() - m_minWidth);
+    if ( rectNew.right() - valid_point.x() + 1 <= m_minWidth)
+        valid_point.setX( rectNew.right() - m_minWidth + 1);
 
     rectNew.setLeft( valid_point.x() );
 }
@@ -408,8 +394,8 @@ void CropBox::handleResizeRight(QPoint &valid_point, QRect &rectNew, const QWidg
         return;
     }
 
-    if ( valid_point.x() - rectNew.left() < m_minWidth)
-        valid_point.setX( rectNew.left() + m_minWidth);
+    if ( valid_point.x() - rectNew.left() + 1 <= m_minWidth)
+        valid_point.setX( rectNew.left() + m_minWidth - 1);
 
     rectNew.setRight( valid_point.x() );
 }
@@ -417,25 +403,25 @@ void CropBox::handleResizeRight(QPoint &valid_point, QRect &rectNew, const QWidg
 void CropBox::handleResizeRightTop(QPoint &valid_point, QRect &rectNew, const QWidget *parent_widget)
 {
     if (m_zoomMode !=  Free) {
-        if (valid_point.x() - rectNew.left() < m_ratioMinWidth)
-            valid_point.setX( rectNew.left() + m_ratioMinWidth );
+        if (valid_point.x() - rectNew.left() + 1 <= m_ratioMinWidth)
+            valid_point.setX( rectNew.left() + m_ratioMinWidth - 1);
 
-        if (rectNew.bottom() - valid_point.y() < m_ratioMinHeight)
-            valid_point.setY( rectNew.bottom() - m_ratioMinHeight);
+        if (rectNew.bottom() - valid_point.y() + 1 <= m_ratioMinHeight)
+            valid_point.setY( rectNew.bottom() - m_ratioMinHeight + 1);
 
-        int right = (rectNew.bottom()- valid_point.y())/m_heightwidthRatio + rectNew.left() ;
+        int right = (rectNew.bottom()- valid_point.y() + 1)/m_heightwidthRatio + rectNew.left() - 1 ;
         if ( right > parent_widget->width() ) {
             right = parent_widget->width();
-            valid_point.setY( rectNew.bottom() - (parent_widget->width() - rectNew.left())*m_heightwidthRatio );
+            valid_point.setY( rectNew.bottom() - (parent_widget->width() - rectNew.left() + 1)*m_heightwidthRatio + 1 );
         }
 
         valid_point.setX( right );
     } else {
-        if (valid_point.x() - rectNew.left() < m_minWidth)
-            valid_point.setX( rectNew.left() + m_minWidth);
+        if (valid_point.x() - rectNew.left() + 1 <= m_minWidth)
+            valid_point.setX( rectNew.left() + m_minWidth - 1);
 
-        if (rectNew.bottom() - valid_point.y() < m_minHeight )
-            valid_point.setY( rectNew.bottom() - m_minHeight );
+        if (rectNew.bottom() - valid_point.y() + 1 <= m_minHeight )
+            valid_point.setY( rectNew.bottom() - m_minHeight + 1 );
 
     }
 
@@ -446,24 +432,24 @@ void CropBox::handleResizeRightTop(QPoint &valid_point, QRect &rectNew, const QW
 void CropBox::handleResizeRightBottom(QPoint &valid_point, QRect &rectNew, const QWidget *parent_widget)
 {
     if (m_zoomMode !=  Free) {
-        if (valid_point.x() - rectNew.left() < m_ratioMinWidth)
-            valid_point.setX( m_ratioMinWidth + rectNew.left() );
+        if (valid_point.x() - rectNew.left() + 1 <= m_ratioMinWidth)
+            valid_point.setX( m_ratioMinWidth + rectNew.left() - 1);
 
-        if (valid_point.y() - rectNew.top()  < m_ratioMinHeight)
-            valid_point.setY( rectNew.top() + m_ratioMinHeight );
+        if (valid_point.y() - rectNew.top() + 1 <= m_ratioMinHeight)
+            valid_point.setY( rectNew.top() + m_ratioMinHeight - 1 );
 
-        int bottom =  (valid_point.x() - rectNew.left())*m_heightwidthRatio  + rectNew.top() ;
+        int bottom =  (valid_point.x() - rectNew.left() + 1)*m_heightwidthRatio  + rectNew.top() - 1;
         if ( bottom >  parent_widget->height()) {
             bottom = parent_widget->height();
-            valid_point.setX( rectNew.left() + (parent_widget->height() - rectNew.top()) / m_heightwidthRatio);
+            valid_point.setX( rectNew.left() + (parent_widget->height() - rectNew.top() + 1) / m_heightwidthRatio - 1);
         }
         valid_point.setY( bottom );
     } else {
-        if (valid_point.x() - rectNew.left() < m_minWidth)
-            valid_point.setX( m_minWidth + rectNew.left() );
+        if (valid_point.x() - rectNew.left() + 1 <= m_minWidth)
+            valid_point.setX( m_minWidth + rectNew.left() - 1 );
 
-        if (valid_point.y() - rectNew.top()  < m_minHeight)
-            valid_point.setY( rectNew.top() + m_minHeight);
+        if (valid_point.y() - rectNew.top() + 1 <= m_minHeight)
+            valid_point.setY( rectNew.top() + m_minHeight - 1);
     }
 
     rectNew.setRight(valid_point.x());
@@ -474,24 +460,24 @@ void CropBox::handleResizeLeftTop(QPoint &valid_point, QRect &rectNew, const QWi
 {
     Q_UNUSED(parent_widget);
     if (m_zoomMode !=  Free) {
-        if (rectNew.right() - valid_point.x() < m_ratioMinWidth)
-            valid_point.setX( rectNew.right() - m_ratioMinWidth );
+        if (rectNew.right() - valid_point.x() + 1 <= m_ratioMinWidth)
+            valid_point.setX( rectNew.right() - m_ratioMinWidth + 1);
 
-        if (rectNew.bottom() - valid_point.y()   < m_ratioMinHeight)
-            valid_point.setY( rectNew.top() - m_ratioMinHeight);
+        if (rectNew.bottom() - valid_point.y()+1 <= m_ratioMinHeight)
+            valid_point.setY( rectNew.top() - m_ratioMinHeight + 1);
 
-        int top = rectNew.bottom()  - (rectNew.right() - valid_point.x()) * m_heightwidthRatio ;
+        int top = rectNew.bottom()  - (rectNew.right() - valid_point.x() + 1) * m_heightwidthRatio + 1;
         if ( top < 0 ) {
             top = 0;
-            valid_point.setX( rectNew.right() - rectNew.bottom()/m_heightwidthRatio );
+            valid_point.setX( rectNew.right() + 1 - (rectNew.bottom() + 1)/m_heightwidthRatio);
         }
         valid_point.setY( top );
     } else {
-        if (rectNew.right() - valid_point.x() < m_minWidth)
-            valid_point.setX( rectNew.right() - m_minWidth );
+        if (rectNew.right() - valid_point.x() + 1 <= m_minWidth)
+            valid_point.setX( rectNew.right() - m_minWidth + 1 );
 
-        if (rectNew.bottom() - valid_point.y()   < m_minHeight)
-            valid_point.setY( rectNew.top() - m_minHeight);
+        if (rectNew.bottom() - valid_point.y() + 1 <= m_minHeight)
+            valid_point.setY( rectNew.bottom() - m_minHeight + 1);
     }
 
     rectNew.setLeft(valid_point.x());
@@ -503,24 +489,24 @@ void CropBox::handleResizeLeftBottom(QPoint &valid_point, QRect &rectNew, const 
     Q_UNUSED(parent_widget);
 
     if (m_zoomMode !=  Free) {
-        if (rectNew.right() - valid_point.x() < m_ratioMinWidth)
-            valid_point.setX( rectNew.right() - m_ratioMinWidth );
+        if (rectNew.right() - valid_point.x() + 1 <= m_ratioMinWidth)
+            valid_point.setX( rectNew.right() - m_ratioMinWidth + 1 );
 
-        if (valid_point.y() - rectNew.top()  < m_ratioMinHeight)
-            valid_point.setY( rectNew.top() + m_ratioMinHeight);
+        if (valid_point.y() - rectNew.top() + 1 <= m_ratioMinHeight)
+            valid_point.setY( rectNew.top() + m_ratioMinHeight - 1);
 
-        int left = rectNew.right() -  (valid_point.y() - rectNew.top())/m_heightwidthRatio;
+        int left = rectNew.right() - (valid_point.y() - rectNew.top() + 1)/m_heightwidthRatio + 1;
         if ( left < 0 ) {
             left = 0;
-            valid_point.setY( rectNew.right() * m_heightwidthRatio + rectNew.top() );
+            valid_point.setY( (rectNew.right()+1) * m_heightwidthRatio + rectNew.top() - 1 );
         }
         valid_point.setX( left ) ;
     } else {
-        if (rectNew.right() - valid_point.x() < m_minWidth)
-            valid_point.setX( rectNew.right() - m_minWidth );
+        if (rectNew.right() - valid_point.x() + 1 <= m_minWidth)
+            valid_point.setX( rectNew.right() - m_minWidth + 1);
 
-        if (valid_point.y() - rectNew.top()  < m_minHeight)
-            valid_point.setY( rectNew.top() + m_minHeight);
+        if (valid_point.y() - rectNew.top() + 1 <= m_minHeight)
+            valid_point.setY( rectNew.top() + m_minHeight - 1);
     }
 
     rectNew.setLeft(valid_point.x());
